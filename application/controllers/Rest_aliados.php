@@ -799,7 +799,7 @@ class Rest_aliados extends REST_Controller
 		}
 
 		function EditarCarrera_post(){
-			$this->load->model('Carreras_model','car');
+			$this->load->model('Carreras_model','car111');
 			$data=json_decode($this->post('data'));
 			$user=json_decode($this->post('user'));
 			$idCarrera=json_decode($this->post('idCarrera'));
