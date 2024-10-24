@@ -352,6 +352,7 @@ class Rest_instructores extends Rest_Controller{
 		//listado de todos instructores activos
 		$this->load->model('instructores_model','ins');
 		$this->load->model('likes_model','lik'); 
+		$this->load->model('Carreras_model','car');
 		$pag=$this->post('pagina');
 		$usuario=$this->post('usuario');
 		
@@ -364,7 +365,7 @@ class Rest_instructores extends Rest_Controller{
 			'ins_fk_perfil'=>0
 		));
 		$cantdat=ceil($cantdat/20);
-		$data=$this->ins->limit(20,$ini)->order_by('ins_likes','DESC')->get_many_by(array(
+		$data=$this->ins->limit(20,$ini)->order_by('fk_puntaje_carrera','DESC')->order_by('ins_likes', 'DESC')->get_many_by(array(
 			'ins_estado'=>1,
 			'ins_fk_perfil'=>0
 		));
@@ -373,6 +374,10 @@ class Rest_instructores extends Rest_Controller{
 			$cursos=$this->ins->cursosintructor($dat->ins_id);
 			//$likes=$this->lik->likeporinstructor($dat->ins_id);
 			$gimnasios=$this->ins->gimnasiosinstructor($dat->ins_id);
+			
+
+			
+
 			if($usuario>0){
 				$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->ins_id , 'like_tipo'=>1));
 			if($verifi_like==0){
@@ -385,9 +390,9 @@ class Rest_instructores extends Rest_Controller{
 
 			$dat->cursos=$cursos;
 			$dat->gimnasios=$gimnasios;
-				//$dat->likes=$likes;
 				
 		}
+
 		
 		$resp['lista']=$data; 
 		$resp['ok']=true;

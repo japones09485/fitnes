@@ -722,27 +722,33 @@ class Rest_aliados extends REST_Controller
 			$this->load->model('Rel_carreras_aliado_model','rel');
 
 			$id_aliado = $this->post('id_aliado');
-			$rel_carreras = $rel_carreras = $this->rel->get_many_by(array(
-				'fk_instructor' => $id_aliado
-			));
-			$not_in = '';
 
-			foreach ($rel_carreras as  $value) {
-				$not_in .= $value->fk_carrera.',';
+			$carrerasAliado = $this->car->carrerasAliado($id_aliado);
+			
+			$not_in = []; 
+			$totalCarrerasAliado = 0;
+
+			if(count($carrerasAliado)>0){
+				foreach ($carrerasAliado as $value) {
+					$not_in[] = $value->fk_carrera;  // Agrega cada fk_carrera al array
+					$totalCarrerasAliado += $value->puntaje;
+				}
+			
+				$carrerasDisponibles = $this->car->carrerasDisponibles($not_in);
+			}else{
+
+				$carrerasDisponibles = $this->car->get_many_by(array(
+					'estado'=>1
+				));
 			}
 
-			echo '<pre>';
-			print_r($not_in);
-			exit;
 			
-			
-			
-
-			$carreras = $this->car->get_many_by(array(
-				'estado'=>1
-			));
-			$resp['carreras'] = $carreras;
+			$resp['carrerasDisponibles'] = $carrerasDisponibles;
+			$resp['carrerasAliado'] = $carrerasAliado;
+			$resp['totalAliado'] = $totalCarrerasAliado;
 			$resp['success'] = true;
+
+			
 			$this->response($resp);	
 		}
 
@@ -822,6 +828,104 @@ class Rest_aliados extends REST_Controller
 			$resp['mensaje'] = 'Carrera editada exitosamente.';
 			$resp['carrera'] = $carrera;
 			$resp['success'] = true;
+			$this->response($resp);	
+
+			
+		}
+
+		function AgregarCarrera_post(){
+			$this->load->model('Carreras_model','car');
+			$this->load->model('Rel_carreras_aliado_model','rel');
+			$this->load->model('instructores_model','ins');
+
+			$data=json_decode($this->post('data'));
+			$idAliado=json_decode($this->post('idAliado'));
+			$this->rel->insert(array(
+				'fk_aliado'=>$idAliado,
+				'fk_carrera'=>$data->carreraEle
+			));
+
+			$carrerasAliado = $this->car->carrerasAliado($idAliado);
+			
+			$not_in = []; 
+			$totalCarrerasAliado = 0;
+			if(count($carrerasAliado)>0){
+				foreach ($carrerasAliado as $value) {
+					$not_in[] = $value->fk_carrera;  // Agrega cada fk_carrera al array
+					$totalCarrerasAliado += $value->puntaje;
+				}
+			
+				$carrerasDisponibles = $this->car->carrerasDisponibles($not_in);
+			}else{
+
+				$carrerasDisponibles = $this->car->get_many_by(array(
+					'estado'=>1
+				));
+			}
+		
+			
+			$this->ins->update_by(array(
+				'ins_id'=>$idAliado
+			),array(
+				'fk_puntaje_carrera'=>$totalCarrerasAliado
+			));
+			
+			$resp['mensaje'] = 'Carrera agregada exitosamente.';
+			$resp['carrerasDisponibles'] = $carrerasDisponibles;
+			$resp['carrerasAliado'] = $carrerasAliado;
+			$resp['totalAliado'] = $totalCarrerasAliado;
+			$resp['success'] = true;
+			
+			$this->response($resp);	
+			
+		}
+
+		function eliminarCarreraAlid_post(){
+			$this->load->model('Carreras_model','car');
+			$this->load->model('Rel_carreras_aliado_model','rel');
+			$this->load->model('instructores_model','ins');
+
+			$idAliado=$this->post('idAliado');
+			$idCarrera=$this->post('idCarrera');
+
+			$this->rel->delete_by(array(
+				'fk_aliado'=>$idAliado,
+				'fk_carrera'=>$idCarrera
+			)); 
+
+			$carrerasAliado = $this->car->carrerasAliado($idAliado);
+
+			
+			$not_in = []; 
+			$totalCarrerasAliado = 0;
+			if(count($carrerasAliado)>0){
+				foreach ($carrerasAliado as $value) {
+					$not_in[] = $value->fk_carrera;  // Agrega cada fk_carrera al array
+					$totalCarrerasAliado += $value->puntaje;
+				}
+			
+				$carrerasDisponibles = $this->car->carrerasDisponibles($not_in);
+			}else{
+
+				$carrerasDisponibles = $this->car->get_many_by(array(
+					'estado'=>1
+				));
+			}
+		
+			
+
+			$this->ins->update_by(array(
+				'ins_id'=>$idAliado
+			),array(
+				'fk_puntaje_carrera'=>$totalCarrerasAliado
+			));
+
+			$resp['mensaje'] = 'Carrera eliminada exitosamente.';
+			$resp['carrerasDisponibles'] = $carrerasDisponibles;
+			$resp['carrerasAliado'] = $carrerasAliado;
+			$resp['totalAliado'] = $totalCarrerasAliado;
+			$resp['success'] = true;
+			
 			$this->response($resp);	
 
 			
