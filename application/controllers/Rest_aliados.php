@@ -773,13 +773,15 @@ class Rest_aliados extends REST_Controller
 			$this->load->model('Carreras_model','car');
 			$data=json_decode($this->post('data'));
 			$user=json_decode($this->post('user'));
-
+			
 			$this->car->insert(array(
 				'nombre'=>$data->nombre,
 				'fecha_creacion'=> date('Y-m-d H:i:s'),
 				'fk_usuario'=>$user,
 				'estado'=>$data->estado,
-				'puntaje'=>$data->puntaje
+				'puntaje'=>$data->puntaje,
+				'nivel'=>$data->nivel,
+				'sistema'=>$data->sistema
 			));
 
 			$carreras = $this->car->get_all();
@@ -817,7 +819,9 @@ class Rest_aliados extends REST_Controller
 				'fecha_creacion'=> date('Y-m-d H:i:s'),
 				'fk_usuario'=>$user,
 				'estado'=>$data->estado,
-				'puntaje'=>$data->puntaje
+				'puntaje'=>$data->puntaje,
+				'nivel'=>$data->nivel,
+				'sistema'=>$data->sistema
 			));
 
 			$carrera = $this->car->get_by(array(
