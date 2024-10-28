@@ -355,6 +355,8 @@ class Rest_instructores extends Rest_Controller{
 		$this->load->model('Carreras_model','car');
 		$pag=$this->post('pagina');
 		$usuario=$this->post('usuario');
+
+		
 		
 		if(empty($pag)){
 			$pag=1;
@@ -372,11 +374,12 @@ class Rest_instructores extends Rest_Controller{
 		
 		foreach($data as $dat){
 			$cursos=$this->ins->cursosintructor($dat->ins_id);
+			$carreras=$this->car->carrerasAliado($dat->ins_id);
 			//$likes=$this->lik->likeporinstructor($dat->ins_id);
 			$gimnasios=$this->ins->gimnasiosinstructor($dat->ins_id);
-			
 
-			
+			$nivelAlto = $this->car->getNivelAlto($dat->ins_id);
+		
 
 			if($usuario>0){
 				$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->ins_id , 'like_tipo'=>1));
@@ -389,7 +392,9 @@ class Rest_instructores extends Rest_Controller{
 			}
 
 			$dat->cursos=$cursos;
+			$dat->carreras=$carreras;
 			$dat->gimnasios=$gimnasios;
+			$dat->nivelAlto=$nivelAlto;
 				
 		}
 

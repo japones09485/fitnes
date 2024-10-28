@@ -27,9 +27,33 @@ class Carreras_model extends MY_Model {
 			
 		
 		)); 
+		$this->db->order_by('t_carreras.nombre', 'ASC');
 		$result = $this->db->get();
 		return $result->result();
     }
+
+	public function getNivelAlto($idAliado) {
+		// Selecciona todos los campos de las tablas t_carreras y rel_instructor_carreras
+		$this->db->select('sistema , nivel');
+		$this->db->from('t_carreras');
+		$this->db->join('rel_instructor_carreras', 't_carreras.id = rel_instructor_carreras.fk_carrera');
+		
+		// Condiciones para el ID del aliado y el sistema
+		$this->db->where('rel_instructor_carreras.fk_aliado', $idAliado);
+		$this->db->where('sistema', 'LAQF');
+		
+		// Ordenar por el campo 'nivel' de forma descendente
+		$this->db->order_by('nivel', 'DESC');
+		
+		// Limitar la consulta a un solo resultado
+		$this->db->limit(1);
+		
+		$query = $this->db->get();
+		
+		// Retorna el resultado como un objeto o NULL si no hay resultados
+		return $query->row();
+	}
+	
 	
 	
 }
