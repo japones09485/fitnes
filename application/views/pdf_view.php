@@ -83,6 +83,7 @@
         <h1><?php echo $title; ?></h1>
         <h3>Nombre del Estudiante: <?php echo $resultados[0]->nombre; ?></h3>
         <h4>Examen: <?php echo $resultados[0]->nombre_examen; ?></h4>
+        <h4>Resultado: <?php echo $totales; ?></h4>
         
         <table>
             <thead>
@@ -99,8 +100,27 @@
                     <tr>
                         <td><?php echo $resultado->enunciado_pregunta; ?></td>
                         <td><?php echo $resultado->tipo_pregunta; ?></td>
-                        <td><?php echo $resultado->respuesta_elegida; ?></td>
-                        <td><?php echo $resultado->respuesta_correcta; ?></td>
+                        <td><?php 
+                            if($resultado->respuesta_elegida == 'true'){
+                                echo 'Verdadero';
+                            }else if($resultado->respuesta_elegida == 'false'){
+                                echo 'Falso';
+                            }else{
+                                echo $resultado->respuesta_elegida; 
+                            }
+                        
+                        
+                        ?></td>
+                        <td><?php 
+                             if($resultado->respuesta_correcta == 'true'){
+                                echo 'Verdadero';
+                            }else if($resultado->respuesta_correcta == 'false'){
+                                echo 'Falso';
+                            }else{
+                                echo $resultado->respuesta_correcta; 
+                            }
+                        
+                        ?></td>
                         <td class="<?php echo $resultado->resultado === 'Correcto' ? 'resultado-correcto' : 'resultado-incorrecto'; ?>">
                             <?php echo $resultado->resultado; ?>
                         </td>

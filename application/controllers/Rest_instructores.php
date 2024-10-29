@@ -379,7 +379,6 @@ class Rest_instructores extends Rest_Controller{
 			$gimnasios=$this->ins->gimnasiosinstructor($dat->ins_id);
 
 			$nivelAlto = $this->car->getNivelAlto($dat->ins_id);
-		
 
 			if($usuario>0){
 				$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->ins_id , 'like_tipo'=>1));
@@ -398,6 +397,7 @@ class Rest_instructores extends Rest_Controller{
 				
 		}
 
+		
 		
 		$resp['lista']=$data; 
 		$resp['ok']=true;

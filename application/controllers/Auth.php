@@ -53,9 +53,8 @@ class Auth extends REST_Controller
 			$instructor = $this->ins->get_by(array(
 				'ins_correo'=>$usuario
 			));
-			
-			
 
+          
             if($user->usu_estado == 0){
                 $data['status'] = false;
                 $data['mensaje'] = 'Usuario Inactivo por favor ponerse en contacto con contacto@cityfitnessworld.com';

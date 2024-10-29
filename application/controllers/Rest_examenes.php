@@ -705,4 +705,54 @@ class Rest_examenes extends REST_Controller
 		
 		
 	}
+
+	public function PdfResultado_post(){
+
+		$this->load->model('usuarios_model', 'usu');
+		$this->load->model('Respuestas_alum_model', 'res');
+		$this->load->model('Resultados_examen_model', 'resul');
+
+		$presentacion = $this->post('idPresentacion');
+		
+		// Cargar la librería Dompdf
+		$this->load->library('pdf');
+
+		// Obtener los resultados de la base de datos
+
+		$resultados_pdf = $this->res->result_pdf($presentacion);
+
+		$resultadosTotales = $this->resul->get_by(array(
+			'resul_fk_presen'=>$presentacion
+		));
+		
+		
+		// Crear el contenido HTML que irá en el PDF
+		$name = "Resultados_PDF_".$presentacion;
+		$data['title'] = $name;
+		$data['resultados'] = $resultados_pdf; // Pasar los resultados a la vista
+		$data['totales'] = $resultadosTotales->result_cuantitativa;
+
+		$html = $this->load->view('pdf_view', $data, TRUE);
+
+		// Cargar el contenido HTML en Dompdf
+		$this->pdf->loadHtml($html);
+
+		// Configurar el tamaño del papel y la orientación
+		$this->pdf->setPaper('A4', 'portrait');
+
+		// Renderizar el PDF
+		$this->pdf->render();
+
+		// Obtener el contenido del PDF como una cadena
+		$pdf_content = $this->pdf->output();
+
+		// Guardar el PDF temporalmente
+		$pdf_filepath = FCPATH . 'uploads/resultExamen.pdf';
+		file_put_contents($pdf_filepath, $pdf_content);
+		$dataReturn['success'] = true;
+		$dataReturn['ruta_pdf']  = 'uploads/resultExamen.pdf';
+		$this->response($dataReturn);
+		
+
+	}
 }

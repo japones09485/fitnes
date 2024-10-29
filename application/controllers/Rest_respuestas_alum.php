@@ -201,6 +201,7 @@ class Rest_respuestas_alum extends REST_Controller
 	{
 		$this->load->model('usuarios_model', 'usu');
 		$this->load->model('Respuestas_alum_model', 'res');
+		$this->load->model('Resultados_examen_model', 'resul');
 
 		// Cargar la librería Dompdf
 		$this->load->library('pdf');
@@ -209,9 +210,15 @@ class Rest_respuestas_alum extends REST_Controller
 
 		$resultados_pdf = $this->res->result_pdf($presentacion);
 
+		$resultadosTotales = $this->resul->get_by(array(
+			'resul_fk_presen'=>$presentacion
+		));
+
 		// Crear el contenido HTML que irá en el PDF
 		$data['title'] = "Resultados PDF";
 		$data['resultados'] = $resultados_pdf; // Pasar los resultados a la vista
+		$data['totales'] = $resultadosTotales->result_cuantitativa;
+		
 		$html = $this->load->view('pdf_view', $data, TRUE);
 
 		// Cargar el contenido HTML en Dompdf

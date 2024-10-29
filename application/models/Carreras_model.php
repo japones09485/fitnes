@@ -33,25 +33,30 @@ class Carreras_model extends MY_Model {
     }
 
 	public function getNivelAlto($idAliado) {
-		// Selecciona todos los campos de las tablas t_carreras y rel_instructor_carreras
-		$this->db->select('sistema , nivel');
-		$this->db->from('t_carreras');
-		$this->db->join('rel_instructor_carreras', 't_carreras.id = rel_instructor_carreras.fk_carrera');
-		
-		// Condiciones para el ID del aliado y el sistema
-		$this->db->where('rel_instructor_carreras.fk_aliado', $idAliado);
-		$this->db->where('sistema', 'LAQF');
-		
-		// Ordenar por el campo 'nivel' de forma descendente
-		$this->db->order_by('nivel', 'DESC');
-		
-		// Limitar la consulta a un solo resultado
-		$this->db->limit(1);
-		
-		$query = $this->db->get();
-		
-		// Retorna el resultado como un objeto o NULL si no hay resultados
-		return $query->row();
+		 // Selecciona todos los campos de las tablas t_carreras y rel_instructor_carreras
+		 $this->db->select('sistema, nivel');
+		 $this->db->from('t_carreras');
+		 $this->db->join('rel_instructor_carreras', 't_carreras.id = rel_instructor_carreras.fk_carrera');
+		 
+		 // Condiciones para el ID del aliado y el sistema
+		 $this->db->where('rel_instructor_carreras.fk_aliado', $idAliado);
+		 $this->db->where('t_carreras.sistema', 'LAQF');
+		 
+		 // Ordenar por el campo 'nivel' de forma descendente
+		 $this->db->order_by('nivel', 'DESC');
+		 
+		 // Limitar la consulta a un solo resultado
+		 $this->db->limit(1);
+		 
+		 $query = $this->db->get();
+		 
+		 // Verificar si la consulta obtuvo resultados
+		 if ($query->num_rows() > 0) {
+			 return $query->row();
+		 } else {
+			 // Devolver un objeto con valores null para las columnas
+			 return (object) ['sistema' => null, 'nivel' => null];
+		 }
 	}
 	
 	
