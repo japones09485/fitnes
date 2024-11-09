@@ -732,6 +732,15 @@ class Rest_examenes extends REST_Controller
 		$data['resultados'] = $resultados_pdf; // Pasar los resultados a la vista
 		$data['totales'] = $resultadosTotales->result_cuantitativa;
 
+		if($resultadosTotales->resul_nota == 0){
+			$calif = 'Reprobo';
+		}else if($resultadosTotales->resul_nota == 0){
+			$calif = 'Aprobo';
+		}
+		$data['calificacion'] = $calif;
+
+		
+
 		$html = $this->load->view('pdf_view', $data, TRUE);
 
 		// Cargar el contenido HTML en Dompdf

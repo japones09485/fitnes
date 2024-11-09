@@ -83,7 +83,7 @@
         <h1><?php echo $title; ?></h1>
         <h3>Nombre del Estudiante: <?php echo $resultados[0]->nombre; ?></h3>
         <h4>Examen: <?php echo $resultados[0]->nombre_examen; ?></h4>
-        <h4>Resultado: <?php echo $totales; ?></h4>
+        <h4><?php echo  $calificacion.' - '.$totales; ?></h4>
         
         <table>
             <thead>
