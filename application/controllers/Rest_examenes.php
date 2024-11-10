@@ -734,7 +734,7 @@ class Rest_examenes extends REST_Controller
 
 		if($resultadosTotales->resul_nota == 0){
 			$calif = 'Reprobo';
-		}else if($resultadosTotales->resul_nota == 0){
+		}else if($resultadosTotales->resul_nota == 1){
 			$calif = 'Aprobo';
 		}
 		$data['calificacion'] = $calif;

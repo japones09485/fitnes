@@ -198,90 +198,93 @@ class Rest_respuestas_alum extends REST_Controller
 	}
 
 	function enviarResultados($alumno, $examen, $nota, $cualita, $presentacion)
-	{
-		$this->load->model('usuarios_model', 'usu');
-		$this->load->model('Respuestas_alum_model', 'res');
-		$this->load->model('Resultados_examen_model', 'resul');
+{
+    $this->load->model('usuarios_model', 'usu');
+    $this->load->model('Respuestas_alum_model', 'res');
+    $this->load->model('Resultados_examen_model', 'resul');
 
-		// Cargar la librería Dompdf
-		$this->load->library('pdf');
+    // Cargar la librería Dompdf
+    $this->load->library('pdf');
 
-		// Obtener los resultados de la base de datos
+    // Obtener los resultados de la base de datos
+    $resultados_pdf = $this->res->result_pdf($presentacion);
+    $resultadosTotales = $this->resul->get_by(array(
+        'resul_fk_presen' => $presentacion
+    ));
 
-		$resultados_pdf = $this->res->result_pdf($presentacion);
+	
 
-		$resultadosTotales = $this->resul->get_by(array(
-			'resul_fk_presen'=>$presentacion
-		));
-
-		// Crear el contenido HTML que irá en el PDF
-		$data['title'] = "Resultados PDF";
-		$data['resultados'] = $resultados_pdf; // Pasar los resultados a la vista
-		$data['totales'] = $resultadosTotales->result_cuantitativa;
-		
-		$html = $this->load->view('pdf_view', $data, TRUE);
-
-		// Cargar el contenido HTML en Dompdf
-		$this->pdf->loadHtml($html);
-
-		// Configurar el tamaño del papel y la orientación
-		$this->pdf->setPaper('A4', 'portrait');
-
-		// Renderizar el PDF
-		$this->pdf->render();
-
-		// Obtener el contenido del PDF como una cadena
-		$pdf_content = $this->pdf->output();
-
-		// Guardar el PDF temporalmente
-		$pdf_filepath = FCPATH . 'uploads/result.pdf';
-		file_put_contents($pdf_filepath, $pdf_content);
-
-
-		$dataalumno = $this->usu->get_by(array(
-			'usu_id' => $alumno
-		));
-
-		$nombre_alumno = $dataalumno->usu_nombres . ' ' . $dataalumno->usu_apellidos;
-		$email_alumno = $dataalumno->usu_email;
-		//validamos nota
-
-
-		if ($nota == 1) {
-			$nota = 'APROBADO';
-		} else {
-			$nota = 'REPROBADO';
-		}
-
-		$cabecera = 'City Fitness World resultado de evaluacion de : ' . $nombre_alumno;
-		$body = 'Ha finalizado la presentación del examen: ' . $examen->nombre . ' con resultado:	' . $nota . ' - ' . $cualita;
-
-		$config['protocol'] = 'sendmail';
-		$config['mailtype'] = 'html';
-		$config['charset']  = 'utf-8';
-		$config['newline']  = "\r\n";
-
-
-		$this->email->clear(TRUE);
-		$this->email->initialize($config);
-		$this->email->set_mailtype("html");
-		$this->email->from('cityfitnessworld.contacto@cityfitnessworld.com', 'City Fitness World');
-		$this->email->cc($email_alumno);
-		$this->email->bcc('cityfitnessworld.contacto@cityfitnessworld.com');
-		//$this->email->to($email_alumno);
-		$this->email->subject($cabecera);
-		$this->email->message($body);
-
-		// Adjuntar el PDF
-		$this->email->attach($pdf_filepath);
-
-
-		if ($this->email->send()) {
-			//unlink($pdf_filepath);
-			return TRUE;
-		} else {
-			//echo $this->email->print_debugger();
-			return FALSE;
-		}
+    // Crear el contenido HTML que irá en el PDF
+    $data['title'] = "Resultados PDF";
+    $data['resultados'] = $resultados_pdf;
+    $data['totales'] = $resultadosTotales->result_cuantitativa;
+	
+	if($resultadosTotales->resul_nota == 0){
+		$calif = 'Reprobo';
+	}else if($resultadosTotales->resul_nota == 1){
+		$calif = 'Aprobo';
 	}
+	$data['calificacion'] = $calif;
+
+	
+
+
+    // Generar el contenido HTML del PDF
+    $html = $this->load->view('pdf_view', $data, TRUE);
+    $this->pdf->loadHtml($html);
+    $this->pdf->setPaper('A4', 'portrait');
+    $this->pdf->render();
+
+    // Guardar el PDF temporalmente en una carpeta 'uploads'
+    $pdf_filepath = FCPATH . 'uploads/result.pdf';
+    file_put_contents($pdf_filepath, $this->pdf->output());
+
+    // Verificar si el archivo PDF se creó correctamente
+    if (!file_exists($pdf_filepath)) {
+        return FALSE; // Retorna falso si no se generó el PDF
+    }
+
+    // Obtener datos del alumno
+    $dataalumno = $this->usu->get_by(array('usu_id' => $alumno));
+    $nombre_alumno = $dataalumno->usu_nombres . ' ' . $dataalumno->usu_apellidos;
+    $email_alumno = $dataalumno->usu_email;
+
+    // Asignar resultado de la nota
+    $nota = ($nota == 1) ? 'APROBADO' : 'REPROBADO';
+
+    // Configurar el correo electrónico
+    $config = array(
+        'protocol' => 'smtp',
+        'smtp_host' => 'mail.cityfitnessworld.com',
+        'smtp_port' => 587,
+        'smtp_user' => 'contacto@cityfitnessworld.com',
+        'smtp_pass' => 'contacto@cityfitnessworld.com',
+        'mailtype' => 'html',
+        'charset' => 'utf-8',
+        'newline' => "\r\n"
+    );
+
+	
+
+    $this->load->library('email', $config);
+    $this->email->set_mailtype("html");
+    $this->email->from('cityfitnessworld.contacto@cityfitnessworld.com', 'City Fitness World');
+    $this->email->to($email_alumno);
+    $this->email->bcc('gimnasioscityfitness@gmail.com');
+    $this->email->subject('City Fitness World resultado de evaluación de: ' . $nombre_alumno);
+    $this->email->message('Ha finalizado la presentación del examen: ' . $examen->nombre . ' con resultado: ' . $nota . ' - ' . $cualita);
+
+    // Adjuntar el archivo PDF
+    $this->email->attach($pdf_filepath);
+	
+    // Enviar el correo y verificar si se envió correctamente
+    if ($this->email->send()) {
+        unlink($pdf_filepath); // Elimina el archivo temporal después de enviar el correo
+        return TRUE;
+    } else {
+        echo $this->email->print_debugger(); // Muestra los errores si hay problemas
+        return FALSE;
+    }
+  }
+
 }
