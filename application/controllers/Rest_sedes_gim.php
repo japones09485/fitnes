@@ -5,7 +5,7 @@ use Restserver\Libraries\REST_Controller;
 require(APPPATH.'libraries/Rest_Controller.php');
 require(APPPATH.'libraries/Format.php');
 
-class Rest_gimnasios extends REST_Controller
+class Rest_sedes_gim extends REST_Controller
 {
 	private $campos=array(
 		'gim_nombre'=>'nombre',
@@ -40,38 +40,52 @@ class Rest_gimnasios extends REST_Controller
 */
 
 	public function crear_post(){
-		$this->load->model('gimnasios_model','gim');
+		$this->load->model('Sedes_gim_model','sed');
 		$this->load->library('upload');
 		$this->load->library('image_lib');
 
 		$data=json_decode($this->post('data'));
+		$fkGim=json_decode($this->post('fkGim'));
 
 		
-		$exist=$this->gim->count_by(array(
-			"gim_nit"=>$data->nit
+		$exist=$this->sed->count_by(array(
+			"sed_nit"=>$data->nit
 		));
+
+		
 		
 		if($exist==0){
-			$id=$this->gim->insert(array(
-				'gim_nombre'=>$data->nombre,
-				'gim_nit'=>$data->nit,
-				'gim_email'=>$data->email,
-				'gim_pais'=>$data->pais,
-				'gim_ciudad'=>$data->ciudad,
-				'gim_telefono'=>$data->telefono,
-				'gim_facebook'=>$data->facebook,
-				'gim_instagram'=>$data->instagram,
-				'gim_descripcion'=>$data->descripcion,
-				'gim_mapa'=>$data->mapa,
-				'gim_ruta'=>$data->ruta,
-				'tipo_gimnasio'=>$data->tipo_gimnasio,
-				'gim_estado'=>1
+			$id=$this->sed->insert(array(
+				'sed_fk_gimnasio'=>$fkGim,
+				'sed_nombre'=>$data->nombre,
+				'sed_nit'=>$data->nit,
+				'sed_email'=>$data->email,
+				'sed_pais'=>$data->pais,
+				'sed_ciudad'=>$data->ciudad,
+				'sed_telefono'=>$data->telefono,
+				'sed_facebook'=>$data->facebook,
+				'sed_instagram'=>$data->instagram,
+				'sed_descripcion'=>$data->descripcion,
+				'sed_mapa'=>$data->mapa,
+				'sed_ruta'=>$data->ruta,
+				'sed_estado'=>1,
+				'sed_servicios'=>$data->servicios,
+				'sed_horarios'=>$data->horarios,
+				'sed_precio_mes'=>$data->precio_m,
+				'sed_link_mes'=>$data->link_mes,
+				'sed_precio_trimestre'=>$data->precio_t,
+				'sed_link_trimestre'=>$data->link_tri,
+				'sed_precio_semestre'=>$data->precio_sm,
+				'sed_link_semestre'=>$data->link_sem,
+
 			));
+
+		
 		//carga de archivos
 		if(!empty($_FILES)){
 			
 			foreach ($_FILES as $k => $values) {
-				$carpeta = 'imagenes/gimnasios/' . $id;
+				$carpeta = 'imagenes/Sedesgimnasios/' . $id;
 				if (!file_exists($carpeta)) {
 					mkdir($carpeta, 0777, true);
 				}
@@ -97,7 +111,7 @@ class Rest_gimnasios extends REST_Controller
 					if (!$this->image_lib->resize()) {
 						$resp['imagenes' . $k] = 'Error al redimensionar la imagen' . $k;
 					} else {
-						$this->gim->update_by(array('gim_id' => $id), array('gim_foto' . $k => $carpeta . '/' . $fil->file_name));
+						$this->sed->update_by(array('sed_id' => $id), array('sed_foto' . $k => $carpeta . '/' . $fil->file_name));
 						$resp['imagenes' . $k] = true;
 					}
 					
@@ -106,12 +120,17 @@ class Rest_gimnasios extends REST_Controller
 				}
 			}
 		}	
-		$resp['data']=$this->gim->get_by(array("gim_id"=>$id));;
+		$resp['lista']=$this->sed->get_many_by(array(
+			"sed_fk_gimnasio"=>$fkGim
+		));
+
 		$resp['ok']=true;
 		}else{
 			$resp['data']='';
 			$resp['ok']=false;
 		}
+
+	
 		$this->response($resp);
 	}
   /**
@@ -209,27 +228,16 @@ class Rest_gimnasios extends REST_Controller
 	/**
 	 * GET $pagina:number
 	 */
-	function listar_get(){
-		$this->load->model('gimnasios_model','gim');
+	function listar_post(){
+		$this->load->model('Sedes_gim_model','sed');
 		$this->load->model('likes_model','lik');
-		$pag=$this->get('pagina');
-		if(empty($pag)){
-			$pag=1;
-		   }
-		$ini=($pag-1)*20;
-		$cantdat=count($this->gim->get_all());
-		$cantdat=ceil($cantdat/20);
-		$data=$this->gim->limit(20,$ini)->order_by('gim_likes','DESC')->get_all();
-		foreach($data as $dat){
-			$instructores=$this->gim->instructoresporgim($dat->gim_id);
-			$likes=$this->lik->likeporgimnasio($dat->gim_id);
-			$dat->instructores=$instructores;
-			$dat->likes=$likes;
-		}
+		$fkGim = $this->post('idGim');
+		$data=$this->sed->get_many_by(array(
+			'sed_fk_gimnasio'=>$fkGim 
+		));
+		
 		$resp['lista']=$data; 
 		$resp['ok']=true;
-		$resp['pag_actual']=$pag;
-		$resp['cant_pag']=$cantdat;
 		$this->response($resp);
 	} 
 
