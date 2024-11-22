@@ -151,16 +151,19 @@ class Rest_sedes_gim extends REST_Controller
  	*
    */
   public function editar_post() {
-    $this->load->model('gimnasios_model', 'gim');
-    $this->load->library('upload');
-    $this->load->library('image_lib');
+    $this->load->model('Sedes_gim_model','sed');
+	$this->load->library('upload');
+	$this->load->library('image_lib');
 
     $data = $inf = json_decode($this->post('data'));
     $id = $data->id_edit;
 
+	
+	
+
     if (count($_FILES) > 0) {
         foreach ($_FILES as $k => $values) {
-            $carpeta = 'imagenes/gimnasios/' . $id;
+            $carpeta = 'imagenes/Sedesgimnasios/' . $id;
             if (!file_exists($carpeta)) {
                 mkdir($carpeta, 0777, true);
             }
@@ -191,8 +194,11 @@ class Rest_sedes_gim extends REST_Controller
                     $resp['imagenes' . $k] = 'Error al redimensionar la imagen ' . $k;
                 } else {
                     // Actualizar la ruta de la imagen en la base de datos
-                    $this->gim->update_by(array('gim_id' => $id), array('gim_foto' . $k => $ruta_imagen));
-                    $resp['imagenes' . $k] = true;
+                  
+
+					$this->sed->update_by(array('sed_id' => $id), array('sed_foto' . $k => $carpeta . '/' . $fil->file_name));
+					$resp['imagenes' . $k] = true;
+
                 }
 
                 // Limpiar configuración de redimensión
@@ -201,25 +207,37 @@ class Rest_sedes_gim extends REST_Controller
         }
     }
 
+
+
+
     // Actualizar los demás datos del gimnasio
-    $this->gim->update_by(array('gim_id' => $id), array(
-        'gim_nombre' => $inf->nombre,
-        'gim_nit' => $inf->nit,
-        'gim_email' => $inf->email,
-        'gim_pais' => $inf->pais,
-        'gim_ciudad' => $inf->ciudad,
-        'gim_telefono' => $inf->telefono,
-        'gim_facebook' => $inf->facebook,
-        'gim_instagram' => $inf->instagram,
-        'gim_descripcion' => $inf->descripcion,
-        'gim_mapa' => $inf->mapa,
-        'gim_ruta' => $inf->ruta,
-        'gim_estado' => $inf->estado,
-		'tipo_gimnasio'=>$inf->tipo_gimnasio
+    $this->sed->update_by(array('sed_id' => $id), array(
+        'sed_nombre'=>$inf->nombre,
+		'sed_nit'=>$inf->nit,
+		'sed_email'=>$inf->email,
+		'sed_pais'=>$inf->pais,
+		'sed_ciudad'=>$inf->ciudad,
+		'sed_telefono'=>$inf->telefono,
+		'sed_facebook'=>$inf->facebook,
+		'sed_instagram'=>$inf->instagram,
+		'sed_descripcion'=>$inf->descripcion,
+		'sed_mapa'=>$inf->mapa,
+		'sed_ruta'=>$inf->ruta,
+		'sed_estado'=>1,
+		'sed_servicios'=>$inf->servicios,
+		'sed_horarios'=>$inf->horarios,
+		'sed_precio_mes'=>$inf->precio_m,
+		'sed_link_mes'=>$inf->link_mes,
+		'sed_precio_trimestre'=>$inf->precio_t,
+		'sed_link_trimestre'=>$inf->link_tri,
+		'sed_precio_semestre'=>$inf->precio_sm,
+		'sed_link_semestre'=>$inf->link_sem
     ));
 
-    $resp['data'] = $this->gim->get_by(array('gim_id' => $id));
+	
+    $resp['data'] = $this->sed->get_by(array('sed_id' => $id));
     $resp['ok'] = true;
+
     $this->response($resp);
 }
 
