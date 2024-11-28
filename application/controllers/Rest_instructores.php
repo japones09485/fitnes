@@ -262,6 +262,15 @@ class Rest_instructores extends Rest_Controller{
 	/**
 	 * GET $pagina:number
 	 */
+
+	 function listarAll_get(){
+		$this->load->model('instructores_model','ins');
+		$instructores = $this->ins->get_all_select();
+		$resp['instructores']=$instructores; 
+		
+		$this->response($resp);
+	 }
+
 	function listar_get(){
 		
 		//listado de todos instructores

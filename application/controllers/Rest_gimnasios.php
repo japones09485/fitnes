@@ -258,6 +258,7 @@ function listaractivos_post(){
 
 	foreach($data as $dat){
 		$instructores=$this->gim->instructoresporgim($dat->gim_id);
+		
 		$likes=$this->lik->likeporgimnasio($dat->gim_id);
 		if($usuario>0){
 		$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->gim_id , 'like_tipo'=>2));

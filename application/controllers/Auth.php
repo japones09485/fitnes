@@ -69,6 +69,7 @@ class Auth extends REST_Controller
                 $data['usu_pais'] = $user->usu_pais;
 				$data['usu_fk_socio'] = $user->usu_fk_socio;
 				$data['usu_fk_empresa_socio'] = $user->usu_fk_empresa_socio;
+                $data['usu_fk_gimnasio'] = $user->usu_fk_gimnasio;
                 $passSYSTEM = md5($contrasenia);
                 $passSYSTEM = md5($contrasenia);
                 if (is_object($user) and $user->usu_password === $passSYSTEM) {

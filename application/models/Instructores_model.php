@@ -78,5 +78,14 @@ class Instructores_model extends MY_Model {
 		$result = $this->db->get();
 		return $result->result();
 	}
+
+	public function get_all_select() {
+		$this->db->select("ins_id as id, CONCAT(ins_nombre, ' ', ins_apellido) as nombre");  // Concatenar con espacio entre el nombre y apellido
+		$this->db->from('t_instructores');
+		
+		$query = $this->db->get();
+		return $query->result();  // Devuelve el resultado como un array de objetos
+	}
+	
 	
 }

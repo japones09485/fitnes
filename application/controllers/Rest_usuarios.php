@@ -63,12 +63,23 @@ class Rest_usuarios extends REST_Controller
 	public function registrarse_post()
 	{
 		$this->load->model('usuarios_model', 'usu');
-		$data = $this->post();
+		
+		$data = $this->post('payload');
+		$perfil = $this->post('perfil');
 		$exist = $this->validarregistro($data['email']);
-
-		//$this->email_registro($data['email'],1);
-
-
+		
+		if(!$perfil){
+			
+			$perfil =2;
+			$gimnasio = 0;
+			$tipoMail = 1;
+		
+		}else{
+		
+			$gimnasio = $data['gimnasio'];
+			$tipoMail = 3;
+		}
+		
 		if ($exist == true) {
 			$passw = md5($data['contrasena']);
 			$data['password'] = $passw;
@@ -79,14 +90,15 @@ class Rest_usuarios extends REST_Controller
 					'usu_email' => $data['email'],
 					'usu_textoclaro' => $data['contrasena'],
 					'usu_password' => $passw,
-					'usu_perfil' => 2,
+					'usu_perfil' => $perfil,
 					'usu_pais' => $data['pais'],
 					'usu_estado' => 1,
 					'usu_cod_verificacion' => md5($data['email']),
 					'usu_estado_verificacion' => 0,
+					'usu_fk_gimnasio' => $gimnasio,
 				)
 			);
-			$this->email_registro($data['email'], 1);
+			$this->email_registro($data['email'], $tipoMail);
 			$resp['ok'] = true;
 			$resp['mensaje'] = 'Revise su correo electrónico, se ha enviado un correo para completar el proceso de registro';
 			$resp['lista'] = $this->usu->get_by(
@@ -136,7 +148,7 @@ class Rest_usuarios extends REST_Controller
 			);
 			$cabecera = 'Bienvenido a City Fitness World para validar su cuenta, por favor dar click al siguiente enlace';
 			$body = 'https://cityfitnessworld.com/fitnes/inicio/verifycodigo/' . trim($codigo);
-		} else {
+		} else if($tipo == 2) {
 			$cod_contrasena = md5($email . rand());
 			$cod_contrasena = str_replace(' ', '', $cod_contrasena);
 
@@ -149,6 +161,19 @@ class Rest_usuarios extends REST_Controller
 			);
 			$cabecera = 'Bienvenido a City Fitness World para restablecer su contraseña, por favor dar click al siguiente enlace';
 			$body = 'https://cityfitnessworld.com/fitnes/inicio/restab_contra/' . $cod_contrasena;
+
+		}else if($tipo == 3) {
+
+			$this->usu->update_by(
+				array(
+					'usu_email' => $email
+				), array(
+					'usu_cod_verificacion' => trim($codigo),
+				)
+			);
+			$cabecera = 'Bienvenido a City Fitness World.';
+			$body = 'Su usuario ha sido creado exitosamente. Por favor, póngase en contacto con su administrador para activar su acceso.';
+
 		}
 
 	
@@ -156,40 +181,33 @@ class Rest_usuarios extends REST_Controller
 
 		$this->load->library('email');
 
-		$config['protocol'] = 'smtp'; // Use 'smtp' for sending via SMTP
-		$config['smtp_host'] = 'mail.cityfitnessworld.com'; // Set your SMTP server address
-		$config['smtp_port'] = 587; // Set the SMTP port
-		$config['smtp_user'] = 'contacto@cityfitnessworld.com'; // Set your SMTP username
-		$config['smtp_pass'] = 'contacto@cityfitnessworld.com'; // Set your SMTP password
-		$config['mailtype'] = 'html'; // Set email type to HTML
-		$config['charset'] = 'utf-8';
-		$config['newline'] = "\r\n";
+		$config = array(
+			'protocol' => 'smtp',
+			'smtp_host' => 'mail.cityfitnessworld.com',
+			'smtp_port' => 587,
+			'smtp_user' => 'contacto@cityfitnessworld.com',
+			'smtp_pass' => 'contacto@cityfitnessworld.com',
+			'mailtype' => 'html',
+			'charset' => 'utf-8',
+			'newline' => "\r\n"
+		);
 
-		$this->load->library('email'); // Load the email library
-		$this->email->initialize($config);
+		$this->load->library('email', $config);
 		$this->email->set_mailtype("html");
 		$this->email->from('cityfitnessworld.contacto@cityfitnessworld.com', 'City Fitness World');
 		$this->email->to($email);
+		$this->email->bcc('gimnasioscityfitness@gmail.com');
 		$this->email->subject($cabecera);
 		$this->email->message($body);
 
 		if ($this->email->send()) {
 			return true;
+			
 		} else {
 			return false;
+			
 		}
-
-		if ($this->email->send()) {
-			return true;
-			//echo 'El correo ha sido enviado correctamente.';
-		} else {
-			return false;
-			//show_error($this->email->print_debugger());
-			//echo 'El correo NO ha sido enviado correctamente.';
-		}
-
-
-
+	
 	}
 
 	function crear_post()
