@@ -39,7 +39,6 @@ class Auth extends REST_Controller
             'usu_textoclaro' => $contrasenia,
 			'usu_perfil'=>$perfil
         ));
-
 		
         if($cont_user>0){
             $user = $this->u->get_by(array(

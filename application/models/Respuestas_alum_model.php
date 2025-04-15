@@ -11,20 +11,25 @@ class Respuestas_alum_model extends MY_Model {
 		// Construimos la consulta SQL
 		$sql = "
 			SELECT 
-				CONCAT(usu.usu_nombres, ' ', usu.usu_apellidos) AS nombre, 
-				exa.nombre AS nombre_examen,
-				ra.fk_pregunta,
-				p.enunciado AS enunciado_pregunta,
-				tp.descripcion AS tipo_pregunta,
-				r.texto_respuesta AS respuesta_elegida,
-				CASE 
-					WHEN ra.fk_tipo_pregunta = 1 THEN rc.texto_respuesta
-					WHEN ra.fk_tipo_pregunta = 2 THEN ra.respuesta
-				END AS respuesta_correcta,
-				CASE 
-					WHEN ra.result_respuesta = 1 THEN 'CORRECTO'
-					WHEN ra.result_respuesta = 0 THEN 'INCORRECTO'
-				END AS resultado
+				CONCAT(usu.usu_nombres, ' ', usu.usu_apellidos) AS nombre,
+       exa.nombre AS nombre_examen,
+       ra.fk_pregunta,
+       p.enunciado AS enunciado_pregunta,
+       tp.descripcion AS tipo_pregunta,
+      
+        CASE
+           WHEN ra.fk_tipo_pregunta = 1 THEN  r.texto_respuesta
+           WHEN ra.fk_tipo_pregunta = 2 THEN ra.respuesta
+       END AS respuesta_elegida,
+       
+       CASE
+           WHEN ra.fk_tipo_pregunta = 1 THEN rc.texto_respuesta
+           WHEN ra.fk_tipo_pregunta = 2 THEN ra.respuesta_true
+       END AS respuesta_correcta,
+       CASE
+           WHEN ra.result_respuesta = 1 THEN 'CORRECTO'
+           WHEN ra.result_respuesta = 0 THEN 'INCORRECTO'
+       END AS resultado
 			FROM  
 				t_respuestas_alumno AS ra
 			INNER JOIN 

@@ -613,40 +613,14 @@ class Rest_instructores extends Rest_Controller{
 
 
 
-	 /*
-	function filtrar_get(){
-		$this->load->model('instructores_model', 'ins');
-		$data=array();
-		$where=array();
-		$param=$this->get();
-		
-		foreach($param as $w => $val){
-			$flag=array_search($w,$this->campos);
-			if($flag!==FALSE){
-			  $where[$flag.' LIKE'] = '%' .$val.'%';
-			}
-		}
-		$sd = $this->ins->filtrar($where);
-		
-		if(!empty($sd)){
-			foreach($sd as $s){
-				$cursos=$this->ins->cursosintructor($s->ins_id);
-				$s->cursos=$cursos;
-			}
-		   $resp['ok'] = true;
-           $resp['lista'] = $sd;
-		}else{
-		   $resp['ok'] = false;
-           $resp['lista'] = $sd;
-		}
-
-		$this->response($resp);
-	}
-		*/
+	
 
 
 		function filtrar_get(){
-			$this->load->model('instructores_model', 'ins');
+			$this->load->model('instructores_model','ins');
+			$this->load->model('likes_model','lik'); 
+			$this->load->model('Carreras_model','car');
+
 			$data=array();
 			$where=array();
 			$param=$this->get();
@@ -663,7 +637,14 @@ class Rest_instructores extends Rest_Controller{
 			if(!empty($sd)){
 				foreach($sd as $s){
 					$cursos=$this->ins->cursosintructor($s->ins_id);
+					$carreras=$this->car->carrerasAliado($s->ins_id);
+					$gimnasios=$this->ins->gimnasiosinstructor($s->ins_id);
+					$nivelAlto = $this->car->getNivelAlto($s->ins_id);
+
 					$s->cursos=$cursos;
+					$s->carreras=$carreras;
+					$s->gimnasios=$gimnasios;
+					$s->nivelAlto=$nivelAlto;
 				}
 			   $resp['ok'] = true;
 			   $resp['lista'] = $sd;
@@ -671,6 +652,9 @@ class Rest_instructores extends Rest_Controller{
 			   $resp['ok'] = false;
 			   $resp['lista'] = $sd;
 			}
+
+
+		
 	
 			$this->response($resp);
 		}

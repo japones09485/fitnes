@@ -22,11 +22,14 @@ class Rest_clases_sedes extends REST_Controller
 		$fkGim = $this->post('fk_gim');
 		$idSede = $this->post('idSede');
 	
-		$data=$this->cla->get_many_by(array(
+		$data=$this->cla->order_by('clas_dia','ASC')->order_by('hora_inicio', 'ASC')->get_many_by(array(
 			'cla_fk_gimnasio'=>$fkGim,
 			'clas_fk_sede'=>$idSede 
 		));
 
+		$ordenArray = array();
+		$diaAc ='';
+		
 		$resp['lista']=$data;
 		$this->response($resp);
 	} 
@@ -37,6 +40,7 @@ class Rest_clases_sedes extends REST_Controller
 		$gim = json_decode($this->post('gim'));
 		$sede = json_decode($this->post('sede'));
 		$user = $this->post('user');
+		
 
 		$this->cla->insert(array(
 			"clas_nombre"=>$data->nombre,
@@ -44,11 +48,14 @@ class Rest_clases_sedes extends REST_Controller
 			"cla_fk_gimnasio"=>$gim,
 			"clas_fk_sede"=>$sede,
 			"clas_fk_instructor"=>$data->instructor,
-			"fecha_inicio"=>$data->fInicial,
-			"fecha_fin"=>$data->fFinal
+			"hora_inicio"=>$data->HoraInicio,
+			"hora_fin"=>$data->HoraFin,
+			"clas_dia"=>$data->dia,
+			"estado"=>$data->estado
+			
 		));
 
-		$data=$this->cla->get_many_by(array(
+		$data=$this->cla->order_by('clas_dia','ASC')->get_many_by(array(
 			'cla_fk_gimnasio'=>$gim,
 			'clas_fk_sede'=>$sede 
 		));
@@ -75,11 +82,13 @@ class Rest_clases_sedes extends REST_Controller
 			"cla_fk_gimnasio"=>$gim,
 			"clas_fk_sede"=>$sede,
 			"clas_fk_instructor"=>$data->instructor,
-			"fecha_inicio"=>$data->fInicial,
-			"fecha_fin"=>$data->fFinal
+			"hora_inicio"=>$data->HoraInicio,
+			"hora_fin"=>$data->HoraFin,
+			"clas_dia"=>$data->dia,
+			"estado"=>$data->estado
 		));
 		
-		$data=$this->cla->get_many_by(array(
+		$data=$this->cla->order_by('clas_dia','ASC')->get_many_by(array(
 			'cla_fk_gimnasio'=>$gim,
 			'clas_fk_sede'=>$sede 
 		));
@@ -89,42 +98,7 @@ class Rest_clases_sedes extends REST_Controller
 	}
 
 
-	function listaractivos_post(){
-		$this->load->model('gimnasios_model','gim');
-		$this->load->model('likes_model','lik');
-		$pag=$this->post('pagina');
-		$usuario=$this->post('usuario');
-		if(empty($pag)){
-			$pag=1;
-		}
-		$ini=($pag-1)*20;
-		$data=$this->gim->order_by('gim_likes','DESC')->get_many_by(array());
-
-		$cantdat=count($data);
-		$cantdat=ceil($cantdat/20);
-
-		foreach($data as $dat){
-			$instructores=$this->gim->instructoresporgim($dat->gim_id);
-			$likes=$this->lik->likeporgimnasio($dat->gim_id);
-			if($usuario>0){
-			$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->gim_id , 'like_tipo'=>2));
-			if($verifi_like==0){
-				$like_usu=false;
-			}else{
-				$like_usu=true;
-			}
-			$dat->verlike=$like_usu;
-			}
-			$dat->instructores=$instructores;
-			$dat->likes=$likes;
-		}
-		$resp['lista']=$data; 
-		$resp['ok']=true;
-		$resp['pag_actual']=$pag;
-		$resp['cant_pag']=$cantdat;
-		$this->response($resp);
-	} 
-
+	
 	function DeleteClase_post(){
 		$this->load->model('Clases_sedes_model','cla');
 		$idClase = $this->post('idClase');

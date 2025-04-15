@@ -76,7 +76,6 @@ class Rest_usuarios extends REST_Controller
 		
 		}else{
 		
-			$gimnasio = $data['gimnasio'];
 			$tipoMail = 3;
 		}
 		
@@ -95,7 +94,6 @@ class Rest_usuarios extends REST_Controller
 					'usu_estado' => 1,
 					'usu_cod_verificacion' => md5($data['email']),
 					'usu_estado_verificacion' => 0,
-					'usu_fk_gimnasio' => $gimnasio,
 				)
 			);
 			$this->email_registro($data['email'], $tipoMail);
@@ -589,14 +587,7 @@ class Rest_usuarios extends REST_Controller
 		$this->response($resp);
 	}
 
-	/**
-	 * POST
-	 * {
-	 *  "id"=>2, 
-	 * "contrasena":"80147247"
-	 * 
-	 * }
-	 */
+
 
 	function olvidaste_contra_post()
 	{
@@ -715,6 +706,55 @@ class Rest_usuarios extends REST_Controller
 			
 	
 			$this->response($resp);
+	}
+
+	function activarUsu_post(){
+		$this->load->model('usuarios_model', 'usu');
+		$idUsu = $this->post('idUsu');
+		$perfil = $this->post('perfil');
+
+		$this->usu->update_by(array(
+			'usu_id' => $idUsu
+		),array(
+			'usu_estado_verificacion' => 1
+		));
+
+		
+
+		$usuarios = $this->usu->get_many_by(array(
+			'usu_perfil' => $perfil
+		));
+
+
+		$data['mensaje'] = 'Usuario activado exitosamente.';
+		$data['usuarios'] = $usuarios;
+		$this->response($data);
+
+	}
+
+	function InactivarUsu_post(){
+		$this->load->model('usuarios_model', 'usu');
+		$idUsu = $this->post('idUsu');
+		$perfil = $this->post('perfil');
+
+		$this->usu->update_by(array(
+			'usu_id' => $idUsu
+		),array(
+			'usu_estado_verificacion' => 0
+		));
+
+		
+
+		$usuarios = $this->usu->get_many_by(array(
+			'usu_perfil' => $perfil
+		));
+	
+
+		$data['mensaje'] = 'Usuario Inactivado exitosamente.';
+		$data['usuarios'] = $usuarios;
+		$this->response($data);
+
+
 	}
 
 

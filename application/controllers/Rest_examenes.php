@@ -724,6 +724,7 @@ class Rest_examenes extends REST_Controller
 		$resultadosTotales = $this->resul->get_by(array(
 			'resul_fk_presen'=>$presentacion
 		));
+
 		
 		
 		// Crear el contenido HTML que irá en el PDF

@@ -21,24 +21,6 @@ class Rest_sedes_gim extends REST_Controller
 	}
 
 
-	/**
-	 * POST
-	*{
-	*"nombre": "bodytech bosa",
-	*"nit": "11223344",
-	*"email": "bodytech@gmail.com",
-  	*"pais": "COL",
-	*"ciudad":"BOGOTA",
-	*"facebook":"www.facebook.com",
-	*"instagram":"www.instagram.com",
-	*"telefono": "32011161561",
-	*"descripcion": "Gimnasios a nivel nacional",
-	*"mapa":"120.565416651165",
-	*"ruta": "455.266",
-	*"estado": "1"
-	*}
-*/
-
 	public function crear_post(){
 		$this->load->model('Sedes_gim_model','sed');
 		$this->load->library('upload');
@@ -73,8 +55,8 @@ class Rest_sedes_gim extends REST_Controller
 				'sed_horarios'=>$data->horarios,
 				'sed_precio_mes'=>$data->precio_m,
 				'sed_link_mes'=>$data->link_mes,
-				'sed_precio_trimestre'=>$data->precio_t,
-				'sed_link_trimestre'=>$data->link_tri,
+				'sed_precio_ano'=>$data->precio_t,
+				'sed_link_ano'=>$data->link_tri,
 				'sed_precio_semestre'=>$data->precio_sm,
 				'sed_link_semestre'=>$data->link_sem,
 
@@ -133,23 +115,7 @@ class Rest_sedes_gim extends REST_Controller
 	
 		$this->response($resp);
 	}
-  /**
-	 * POST
-	*{
-	*id_edit":"18",	
-	*"data":{	
-	*"nombre": "JAPOTECH BOSA YORK",
-	*"nit": "110223344",
-	*"email": "bodytech@gmail.com",
-    *"pais": "COL",
-	*"ciudad":"BOGOTA",
-	*"telefono": "32011161561",
-	*"descripcion": "Gimnasios a nivel nacional",
-    *"mapa":"120.565416651165",
-	*"ruta": "455.266",
-	*
- 	*
-   */
+  
   public function editar_post() {
     $this->load->model('Sedes_gim_model','sed');
 	$this->load->library('upload');
@@ -227,9 +193,9 @@ class Rest_sedes_gim extends REST_Controller
 		'sed_servicios'=>$inf->servicios,
 		'sed_horarios'=>$inf->horarios,
 		'sed_precio_mes'=>$inf->precio_m,
-		'sed_link_mes'=>$inf->link_mes,
-		'sed_precio_trimestre'=>$inf->precio_t,
-		'sed_link_trimestre'=>$inf->link_tri,
+		'sed_link_mes'=>$inf->link_mes,	
+		'sed_precio_ano'=>$inf->precio_t,
+		'sed_link_ano'=>$inf->link_tri,
 		'sed_precio_semestre'=>$inf->precio_sm,
 		'sed_link_semestre'=>$inf->link_sem
     ));
@@ -242,10 +208,7 @@ class Rest_sedes_gim extends REST_Controller
 }
 
 
-//trae todos los gimnasios (admin)
-	/**
-	 * GET $pagina:number
-	 */
+
 	function listar_post(){
 		$this->load->model('Sedes_gim_model','sed');
 		$this->load->model('likes_model','lik');
@@ -259,211 +222,42 @@ class Rest_sedes_gim extends REST_Controller
 		$this->response($resp);
 	} 
 
-     //trae gimnasios activos
-	/**
-	 * POST 
-	 * {
-	 * "pagina":1,
-	 * "usuario":2
-	 * }
-	 */
+	function DeleteSede_post(){
+		$this->load->model('Sedes_gim_model','sed');
+		$idsede = $this->post('idSede');
+		$fkGim = $this->post('sed_fk_gimnasio');
 
-function listaractivos_post(){
-	$this->load->model('gimnasios_model','gim');
-	$this->load->model('likes_model','lik');
-	$pag=$this->post('pagina');
-	$usuario=$this->post('usuario');
-	if(empty($pag)){
-		$pag=1;
-	   }
-	$ini=($pag-1)*20;
-	$data=$this->gim->order_by('gim_likes','DESC')->get_many_by(array());
-
-	$cantdat=count($data);
-	$cantdat=ceil($cantdat/20);
-
-	foreach($data as $dat){
-		$instructores=$this->gim->instructoresporgim($dat->gim_id);
-		$likes=$this->lik->likeporgimnasio($dat->gim_id);
-		if($usuario>0){
-		$verifi_like=$this->lik->count_by(array('like_fk_usuario'=>$usuario , 'like_fk_idactor'=>$dat->gim_id , 'like_tipo'=>2));
-		if($verifi_like==0){
-			$like_usu=false;
-		}else{
-			$like_usu=true;
-		}
-		$dat->verlike=$like_usu;
-		}
-		$dat->instructores=$instructores;
-		$dat->likes=$likes;
-	}
-	$resp['lista']=$data; 
-	$resp['ok']=true;
-	$resp['pag_actual']=$pag;
-	$resp['cant_pag']=$cantdat;
-	$this->response($resp);
-} 
-
-/**
-	 * POST
-	 * {
-			*"id":7,
-	   *}
-
-	 */
-	function desactivar_post(){
-	    //desactivar gimnasio
-		$this->load->model('gimnasios_model','gim');
-		$id=$this->post('id');
-		$resp=array();
-		$this->gim->update_by(array(
-			'gim_id'=>$id
-		),array(
-			'gim_estado'=> 0
+		$this->sed->delete_by(array(
+			'sed_id' => $idsede
 		));
+
+		$data=$this->sed->get_many_by(array(
+			'sed_fk_gimnasio'=>$fkGim 
+		));
+		
+		$resp['lista']=$data; 
 		$resp['ok']=true;
+
+		$resp['mensaje'] = 'Sede eliminada exitosamente.';
 		$this->response($resp);
 	}
 
-	 /**
-	 * POST
-	 * {
-			*"id_edit":7,
-	   *}
-
-	 */
-
-	function activar_post(){
-	   //desactivar gimnasio
-		$this->load->model('gimnasios_model','gim');
-		$id=$this->post('id');
-		$resp=array();
-		$this->gim->update_by(array(
-			'gim_id'=>$id
-		),array(
-			'gim_estado'=> 1
-		));
-		$resp['ok']=true;
-		$this->response($resp);
-
-	}
-
-	/**
-	 * POST
-	 * {
-			*"id":1,
-	   *}
-
-	 */
-
-	function traerid_post(){
+	
+	function SedeId_post()
+	{
 		//trae gimnasio por id
-		$this->load->model('gimnasios_model','gim');
-		$this->load->model('likes_model','lik');
-		$id=$this->post('id');
-		$gimnasio=$this->gim->get_by(array(
-			'gim_id'=>$id
+		$this->load->model('Sedes_gim_model','sed');
+
+		$id = $this->post('id_sede');
+		$sede = $this->sed->get_by(array(
+			'sed_id' => $id
 
 		));
-		$instructores=$this->gim->instructoresporgim($id);
-		$likes=$this->lik->likeporgimnasio($id);
-		$gimnasio->instructores=$instructores;
-		$gimnasio->likes=$likes;
 
-		$resp['data']=$gimnasio;
-		$resp['ok']=true;
-		$this->response($resp);
-
-	}
-
-
-
-	 /**
-	* POST
-	* {
-		*"gimnasio":2,
-		*"usuario": 2
-	*}
-	*/
-
-	function likes_post(){
-		$this->load->model('likes_model','lik');
-		$this->load->model('gimnasios_model','gim');
-		
-		$exist=$this->lik->count_by(array(
-			'like_fk_idactor'=>$this->post('gimnasio'),
-			'like_fk_usuario'=>$this->post('usuario'),
-			'like_tipo'=>2
-		));
-		
-
-		$cant_lik=$this->gim->cant_like($this->post('gimnasio'));
-	
-		if($exist==0){
-			$this->lik->insert(array(
-				'like_fk_idactor'=>$this->post('gimnasio'),
-				'like_fk_usuario'=>$this->post('usuario'),
-				'like_tipo'=>2
-			));
-			$cant_lik=$cant_lik->gim_likes+1;
-			$this->gim->update_by(array('gim_id'=>$this->post('gimnasio')),array(
-				'gim_likes'=>$cant_lik
-			));
-			$resp['ok']=true;
-		}else{
-			$this->lik->delete_by(array(
-				'like_fk_idactor'=>$this->post('gimnasio'),
-				'like_fk_usuario'=>$this->post('usuario'),
-				'like_tipo'=>2
-			));
-			$cant_lik=$cant_lik->gim_likes-1;
-			$this->gim->update_by(array('gim_id'=>$this->post('gimnasio')),array(
-				'gim_likes'=>$cant_lik
-			));
-			$resp['ok']=false;
-		}
-		$tot_lik=$this->gim->cant_like($this->post('gimnasio'));
-		$resp['total_likes']=$tot_lik;
-		$this->response($resp);
-		
-	}
-
-	
-	 /**
-	* GET
-	* {
-		*"nombre":"tea",
-		*"pais":"COL"
-	*}
-	*/
-
-	function filtrar_get(){
-		$this->load->model('gimnasios_model','gim');
-		$this->load->model('likes_model','lik');
-		$data=array();
-		$where=array();
-		$param=$this->get();
-		foreach($param as $w => $val){
-			$flag=array_search($w,$this->campos);
-			if($flag!==FALSE){
-			  $where[$flag.' LIKE'] = '%' .$val.'%';
-			}
-		}
-		$sd = $this->gim->filtrar($where);
-		foreach($sd as $k){
-			$instructores=$this->gim->instructoresporgim($k->gim_id);
-			$k->instructores=$instructores;
-			$k->likes=$this->lik->likeporgimnasio($k->gim_id);
-			
-		}		
-		if(!empty($sd)){
-		   $resp['ok'] = true;
-           $resp['lista'] = $sd;
-		}else{
-		   $resp['ok'] = false;
-           $resp['lista'] = $sd;
-		}
+		$resp['sede'] = $sede;
+		$resp['ok'] = true;
 		$this->response($resp);
 	}
-	
+
+
 }	
