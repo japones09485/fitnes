@@ -216,6 +216,7 @@ class Rest_sedes_gim extends REST_Controller
 		$data=$this->sed->get_many_by(array(
 			'sed_fk_gimnasio'=>$fkGim 
 		));
+
 		
 		$resp['lista']=$data; 
 		$resp['ok']=true;

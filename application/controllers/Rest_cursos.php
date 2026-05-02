@@ -39,6 +39,8 @@ class Rest_cursos extends Rest_Controller{
 	
 		$id=$this->cur->insert($data);
 		//carga de archivos
+
+		
 		if(count($_FILES)>0){
 			foreach($_FILES as $k=>$values){
 				$carpeta = 'imagenes/cursos/'.$id;
@@ -49,13 +51,18 @@ class Rest_cursos extends Rest_Controller{
 			$config['upload_path'] = $carpeta;
 			$config['file_name'] =$mi_archivo;
 			$config['allowed_types'] = "*";
-			$config['max_size'] = "50000";
-			$config['max_width'] = "2000";
-			$config['max_height'] = "2000";
+		
 			$fil=$this->upload->initialize($config,false);
 			if (!$this->upload->do_upload($k)) {
-				//*** ocurrio un error
-				$resp['imagenes'.$k] = 'Error al cargar la foto'.$k;
+				// Error al cargar: Mostramos el error real de la librería
+                $error = $this->upload->display_errors();
+                $resp['error_foto_'.$k] = $error;
+                
+                // Debug profesional en fondo oscuro
+                echo "<pre style='background:#000; color:#ff0000; p:20px;'>";
+                echo "ERROR EN CAMPO [".$k."]: " . $error;
+                echo "</pre>";
+                exit;
 			}else{
 				$resp['imagenes'.$k] = true;
 				$this->cur->update_by(array('cur_id'=>$id),array('cur_foto'.$k=>$carpeta.'/'.$fil->file_name));

@@ -32,7 +32,7 @@ class Rest_trabajos extends REST_Controller
 			'tipo_doc'=>$tipo_doc
 		));
 
-		$data['trabajos'] = $trabajos;
+		$data['trabajos'] = $trabajos;  
 		if(count($trabajos)>0){
 			$data['success'] = true;
 			$data['mensaje'] = 'ok';

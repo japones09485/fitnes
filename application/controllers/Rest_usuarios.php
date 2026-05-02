@@ -436,7 +436,7 @@ class Rest_usuarios extends REST_Controller
 		$pag = $this->post('pagina');
 		$perfilf = $this->post('perfil');
 		$cursof = $this->post('curso');
-
+		
 		if (empty($pag)) {
 			$pag = 1;
 		}
@@ -472,7 +472,7 @@ class Rest_usuarios extends REST_Controller
 
 			
 		}
-
+		
 		$cantusu = ceil($usuarios / 15);
 
 		if ($this->post('perfil') == 1) {
@@ -491,13 +491,14 @@ class Rest_usuarios extends REST_Controller
 			$data = $this->usu->limit(15, $ini)->order_by('usu_perfil', 'ASC')->get_many_by(
 				array(
 					'usu_perfil' => $this->post('perfil'),
-					'fk_curso' => $cursof,
-					'usu_estado !=' => 2
+					'fk_curso' => $cursof
 				)
 			);
 
 			
+			
 		}
+		
 
 		$resp['lista'] = $data;
 		$resp['ok'] = true;
@@ -694,7 +695,7 @@ class Rest_usuarios extends REST_Controller
 			$cantusu = ceil($usuarios / 15);
 			$data = $this->usu->limit(15, 1)->order_by('usu_perfil', 'DESC')->GETuserscur($fk_curso);
 		
-			if( $this->post('newEstado') == 0){
+			if( $this->post('newEstado') == 1){
 				$resp['mensaje'] = 'Usuario Inactivado exitosamente';
 			}else{
 				$resp['mensaje'] = 'Usuario activado exitosamente';
